@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Painel da loja – Flash Lanches</title>
+<style>
+:root{--red:#E4202B;--yel:#FFC21A;--ok:#1E9E5A;--bg:#fff;--surface:#F4F4F2;--ink:#241A15;--muted:#6B625C;--line:#E4E1DC;color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--bg:#1A1411;--surface:#261E19;--ink:#F6F0E8;--muted:#B3A89E;--line:#3A2F28;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;font-family:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--ink);line-height:1.45;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0)}
+header{background:var(--red);color:#fff;padding:.8rem 1rem;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0}
+header h1{margin:0;font-size:1.15rem}
+main{max-width:640px;margin:auto;padding:1rem}
+.hint{background:rgba(255,194,26,.2);border-left:4px solid var(--yel);padding:.7rem .9rem;border-radius:8px;font-size:.9rem}
+.order{border:1px solid var(--line);border-radius:16px;padding:1rem;margin:1rem 0;background:var(--bg)}
+.top{display:flex;justify-content:space-between;align-items:center;gap:.5rem}
+.num{font-weight:800;font-size:1.15rem}
+.tag{font-size:.78rem;font-weight:700;padding:.2rem .6rem;border-radius:999px;background:var(--surface)}
+.tag.s1{background:var(--yel);color:#241A15}.tag.s2{background:#CFE3FF;color:#0B3A7A}.tag.s3{background:#FFD9A0;color:#6B3A00}.tag.s4{background:var(--ok);color:#fff}
+.meta{color:var(--muted);font-size:.9rem;margin:.3rem 0 .6rem}
+.lines div{display:flex;justify-content:space-between;gap:1rem;font-size:.92rem}
+.tot{font-weight:800;margin-top:.4rem;border-top:1px solid var(--line);padding-top:.4rem}
+.acts{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.8rem}
+.acts a,.acts button{display:block;text-align:center;text-decoration:none;font:inherit;font-weight:700;font-size:.88rem;padding:.7rem .4rem;border-radius:10px;border:0;cursor:pointer;background:var(--surface);color:var(--ink)}
+.acts .go{background:#1FA855;color:#fff}
+.acts .full{grid-column:1/-1}
+.acts .done{outline:2px solid var(--ok)}
+.small{background:none;color:var(--muted);text-decoration:underline;font-size:.82rem;border:0;cursor:pointer;font:inherit;padding:.4rem 0}
+.empty{text-align:center;color:var(--muted);padding:3rem 1rem}
+:focus-visible{outline:3px solid var(--yel);outline-offset:2px}
+</style>
+</head>
+<body>
+<header><h1>Painel da loja · Flash Lanches</h1><button class="small" id="clear" style="color:#fff">Limpar entregues</button></header>
+<main>
+  <p class="hint">Quando o cliente enviar o pedido no WhatsApp, toque no link <b>"Painel da loja"</b> da mensagem. O pedido aparece aqui. Depois é só tocar nos botões verdes: o WhatsApp abre com a mensagem pronta para o cliente.</p>
+  <div id="list"></div>
+</main>
+<script>
+const KEY = "flash-orders";
+const brl = n => Number(n).toLocaleString("pt-BR", { style:"currency", currency:"BRL" });
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" }[c]));
+let orders = [];
+try { orders = JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { orders = []; }
+const save = () => { try { localStorage.setItem(KEY, JSON.stringify(orders)); } catch (e) {} };
+
+/* Lê o pedido do link (#p=...) */
+function fromHash() {
+  const m = location.hash.match(/^#p=([\w-]+)/);
+  if (!m) return;
+  try {
+    const b = m[1].replace(/-/g, "+").replace(/_/g, "/");
+    const d = JSON.parse(decodeURIComponent(escape(atob(b + "=".repeat((4 - b.length % 4) % 4)))));
+    if (d && d.n && Array.isArray(d.i) && !orders.some(o => o.n === d.n)) {
+      orders.unshift({ n:String(d.n).slice(0, 20), c:String(d.c || "").slice(0, 80), t:String(d.t || "").slice(0, 20), e:String(d.e || "").slice(0, 300),
+        i:d.i.slice(0, 50).map(x => [+x[0] || 0, String(x[1]).slice(0, 120), +x[2] || 0]), s:+d.s || 0, f:+d.f || 0, v:+d.v || 0, d:+d.d || Date.now(), st:0 });
+      save();
+    }
+  } catch (e) { alert("Não consegui ler esse pedido. Peça para o cliente enviar de novo."); }
+  history.replaceState(null, "", location.pathname);
+}
+
+const STEPS = [
+  { k:1, label:"✅ Pagamento confirmado", msg:(o, p) => `Olá, ${p}! ✅ Recebemos o seu PIX do pedido ${o.n}. Já vamos começar o preparo.` },
+  { k:2, label:"👨‍🍳 Em preparo", msg:(o, p) => `Olá, ${p}! 👨‍🍳 O seu pedido ${o.n} está em andamento: já está na chapa! Previsão de entrega: 35 a 45 minutos.` },
+  { k:3, label:"🛵 Saiu para entrega", msg:(o, p) => `Olá, ${p}! 🛵 O seu pedido ${o.n} saiu para entrega e já está a caminho de ${o.e}.` },
+  { k:4, label:"🎉 Entregue", msg:(o, p) => `Olá, ${p}! 🎉 Pedido ${o.n} entregue. Obrigado pela preferência e bom apetite! Flash Lanches` }
+];
+const NAMES = ["Aguardando pagamento", "Pago", "Em preparo", "Saiu para entrega", "Entregue"];
+const NOPIX = (o, p) => `Olá, ${p}! Ainda não localizamos o PIX do pedido ${o.n}. Pode enviar o comprovante por aqui, por favor?`;
+
+function phone(t) { let d = String(t).replace(/\D/g, ""); if (d.length <= 11) d = "55" + d; return d; }
+const wa = (o, text) => `https://wa.me/${phone(o.t)}?text=${encodeURIComponent(text)}`;
+
+function render() {
+  const el = document.getElementById("list");
+  if (!orders.length) { el.innerHTML = '<div class="empty">Nenhum pedido ainda.<br>Os pedidos aparecem aqui quando você tocar no link do painel.</div>'; return; }
+  el.innerHTML = orders.map((o, idx) => {
+    const p = o.c.split(" ")[0] || "cliente";
+    const hora = new Date(o.d).toLocaleTimeString("pt-BR", { hour:"2-digit", minute:"2-digit" });
+    return `<article class="order">
+      <div class="top"><span class="num">${esc(o.n)}</span><span class="tag s${o.st}">${NAMES[o.st]}</span></div>
+      <div class="meta">${esc(o.c)} · ${esc(o.t)} · ${hora}<br>${esc(o.e)}</div>
+      <div class="lines">${o.i.map(x => `<div><span>${x[0]}× ${esc(x[1])}</span><span>${brl(x[2])}</span></div>`).join("")}
+        <div><span>Entrega</span><span>${o.f ? brl(o.f) : "Grátis"}</span></div></div>
+      <div class="lines"><div class="tot"><span>Total</span><span>${brl(o.v)}</span></div></div>
+      <div class="acts">
+        ${STEPS.map(s => `<a class="go ${o.st >= s.k ? "done" : ""}" data-i="${idx}" data-k="${s.k}" href="${esc(wa(o, s.msg(o, p)))}" target="_blank" rel="noopener">${s.label}</a>`).join("")}
+        <a class="full" href="${esc(wa(o, NOPIX(o, p)))}" target="_blank" rel="noopener">⚠️ Não achei o PIX – pedir comprovante</a>
+      </div>
+      <button class="small" data-del="${idx}">Excluir pedido</button>
+    </article>`;
+  }).join("");
+}
+
+document.addEventListener("click", e => {
+  const a = e.target.closest("a[data-k]");
+  if (a) { const i = +a.dataset.i, k = +a.dataset.k; if (orders[i]) { orders[i].st = k; save(); setTimeout(render, 50); } return; }
+  const d = e.target.closest("[data-del]");
+  if (d && confirm("Excluir este pedido do painel?")) { orders.splice(+d.dataset.del, 1); save(); render(); }
+});
+document.getElementById("clear").addEventListener("click", () => { orders = orders.filter(o => o.st < 4); save(); render(); });
+window.addEventListener("hashchange", () => { fromHash(); render(); });
+fromHash(); render();
+</script>
+</body>
+</html>
