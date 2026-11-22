@@ -1,9 +1,9 @@
 /* ============ CONFIGURAÇÃO ============ */
 const CONFIG = {
-  whatsapp: "5592999999999",   // número da lanchonete (DDI+DDD+número)
+  whatsapp: "559298439367",   // número da lanchonete (DDI+DDD+número)
   fee: 6,                      // taxa de entrega
   freeFrom: 70,                // frete grátis a partir de
-  pixKey: "SUA-CHAVE-PIX-AQUI",  // chave Pix cadastrada no PicPay (e-mail, +5592..., CPF ou aleatória)
+  pixKey: "45f85e9a-6df9-4474-8256-095021916bc5",  // chave Pix cadastrada no PicPay (e-mail, +5592..., CPF ou aleatória)
   pixName: "FLASH LANCHES",      // nome do recebedor: MAIÚSCULAS, sem acento (máx. 25)
   pixCity: "MANAUS"             // cidade: MAIÚSCULAS, sem acento (máx. 15)
 };
@@ -23,8 +23,8 @@ const PRODUCTS = [
   { id:13, cat:"combos", poster:true, img:"imagens/combo-x-tudo-4.jpg", name:"Super Combo X-Tudo (4 Lanches + Refri 1,5L)", desc:"Para matar a fome de verdade! 4 X-Tudos completos com pão macio com gergelim, hambúrguer suculento, queijo derretido, ovo, bacon crocante, calabresa fatiada bem dourada, alface, tomate, mostarda e molho especial da casa, com 1 refrigerante de 1,5L.", price:40 },
   { id:14, cat:"combos", poster:true, img:"imagens/combo-x-tudo-6.jpg", name:"Super Combo X-Tudo (6 Lanches + Refri 1,5L)", desc:"O combo perfeito para a família toda ou para a resenha com os amigos. 6 X-Tudos super recheados com carne suculenta, queijo derretido, ovo, bacon crocante, calabresa dourada, alface, tomate, mostarda e molho especial cremoso, mais 1 refrigerante de 1,5L gelado.", price:60 },
 
-  { id:21, cat:"lanches", emoji:"🍔", bg:"#FFD9A0", name:"X-Salada Especial", desc:"Pão macio com gergelim, hambúrguer suculento, queijo derretido, ovo, alface crocante, tomate fresco e molho especial da casa.", price:6 },
-  { id:22, cat:"lanches", emoji:"🍔", bg:"#FFC9C4", name:"X-Tudo Completo", desc:"Pão macio com gergelim, hambúrguer suculento, queijo derretido, ovo, bacon crocante, calabresa dourada, alface, tomate, mostarda e molho especial da casa.", price:10 },
+  { id:21, cat:"lanches", img:"imagens/combo-x-salada-4.jpg", bg:"#FFD9A0", name:"X-Salada Especial", desc:"Pão macio com gergelim, hambúrguer suculento, queijo derretido, ovo, alface crocante, tomate fresco e molho especial da casa.", price:6 },
+  { id:22, cat:"lanches", img:"imagens/combo-x-salada-4.jpg", bg:"#FFC9C4", name:"X-Tudo Completo", desc:"Pão macio com gergelim, hambúrguer suculento, queijo derretido, ovo, bacon crocante, calabresa dourada, alface, tomate, mostarda e molho especial da casa.", price:10 },
 
   { id:61, cat:"pizzas", img:"imagens/pizza-calabresa.jpg", name:"Pizza de Calabresa", desc:"Massa macia, muito queijo derretido, calabresa fatiada, cebola e azeitonas pretas.", price:30 },
   { id:62, cat:"pizzas", img:"imagens/pizza-catupiry.jpg", name:"Pizza de Catupiry", desc:"Mussarela derretida coberta com cremoso catupiry, azeitonas e orégano.", price:30 },
